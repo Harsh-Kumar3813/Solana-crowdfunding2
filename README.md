@@ -43,7 +43,7 @@ Make sure the following are installed:
 
 🔧 Setup & Build
 # Clone the repo
-git clone https://github.com/simrankumari-dev/SOLANACROWD-A-Decentralized-Crowdfunding-Platform-on-Solana-Blockchain-.git
+git clone "https://github.com/simrankumari-dev/SOLANACROWD-A-Decentralized-Crowdfunding-Platform-on-Solana-Blockchain-.git"
 
 
 cd Solana-crowdfunding1-main
