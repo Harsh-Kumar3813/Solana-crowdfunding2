@@ -1,22 +1,16 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
-    domains: ['localhost'],
-  },
-
-  webpack(config, { isServer }) {
-    if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push('pino-pretty');
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        os: false,
+      }
     }
-    return config;
+    return config
   },
-};
+}
 
-export default nextConfig;
+module.exports = nextConfig
