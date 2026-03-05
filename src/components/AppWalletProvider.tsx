@@ -32,7 +32,7 @@ export default function AppWalletProvider({
 
   const wallets = useMemo(
     () => [new PhantomWalletAdapter(), new SolflareWalletAdapter()],
-    [network]
+    [] // wallets don't depend on network — adapters are network-agnostic
   )
 
   return (

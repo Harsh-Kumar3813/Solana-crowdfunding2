@@ -36,51 +36,61 @@ export default function Page() {
   })
 
   useEffect(() => {
-    if (cid) {
+    if (cid && programReadonly) {
       const fetchDetails = async () => {
         const campaignData = await fetchCampaignDetails(
-          programReadonly!,
+          programReadonly,
           cid as string
         )
-        form.title = campaignData.title
-        form.description = campaignData.description
-        form.image_url = campaignData.imageUrl
-        form.goal = campaignData.goal
+        setForm({
+          title: campaignData.title,
+          description: campaignData.description,
+          image_url: campaignData.imageUrl,
+          goal: String(campaignData.goal),
+        })
       }
       fetchDetails()
     }
-  }, [program, cid])
+  }, [cid, programReadonly])
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (!publicKey) return toast.warn('Please connect wallet')
+    if (!publicKey || !program) return toast.warn('Please connect wallet')
 
-    await toast.promise(
-      new Promise<void>(async (resolve, reject) => {
-        try {
-          const { title, description, image_url, goal } = form
-          const tx: any = await updateCampaign(
-            program!,
-            publicKey!,
-            cid as string,
-            title,
-            description,
-            image_url,
-            Number(goal)
-          )
+    const toastId = toast.loading('Approve transaction in your wallet...')
 
-          console.log(tx)
-          resolve(tx)
-        } catch (error) {
-          reject(error)
-        }
-      }),
-      {
-        pending: 'Approve transaction...',
-        success: 'Transaction successful 👌',
-        error: 'Encountered error 🤯',
-      }
-    )
+    try {
+      const { title, description, image_url, goal } = form
+      const tx = await updateCampaign(
+        program,
+        publicKey,
+        cid as string,
+        title,
+        description,
+        image_url,
+        Number(goal)
+      )
+
+      toast.update(toastId, {
+        render: 'Campaign updated successfully 👌',
+        type: 'success',
+        isLoading: false,
+        autoClose: 5000,
+      })
+      console.log(tx)
+    } catch (error: any) {
+      const isRejected =
+        error?.name === 'WalletSignTransactionError' ||
+        error?.message?.includes('User rejected') ||
+        error?.message?.includes('rejected the request')
+
+      toast.update(toastId, {
+        render: isRejected ? 'Transaction cancelled by user' : 'Update failed 🤯',
+        type: isRejected ? 'warning' : 'error',
+        isLoading: false,
+        autoClose: 5000,
+      })
+    }
   }
 
   // Fallback if campaign not found

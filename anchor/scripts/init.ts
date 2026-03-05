@@ -37,15 +37,15 @@ const main = async (cluster: string) => {
   )
 
   try {
-    const state = await program.account.programState.fetch(programStatePda)
+    const state = await program.account.ProgramState.fetch(programStatePda)
     console.log(`Program already initialized, status: ${state.initialized}`)
   } catch (error) {
     const tx = await program.methods
       .initialize()
       .accountsPartial({
-        programState: programStatePda,
+        program_state: programStatePda,
         deployer: provider.wallet.publicKey,
-        systemProgram: SystemProgram.programId,
+        system_program: SystemProgram.programId,
       })
       .rpc()
 
