@@ -18,12 +18,12 @@ pub fn withdraw(ctx: Context<WithdrawCtx>, cid: u64, amount: u64) -> Result<()> 
         return Err(Unauthorized.into());
     }
 
-    if amount <= 1_000_000_000 {
+    if amount < 1_000_000_000 {
         return Err(InvalidWithdrawalAmount.into());
     }
 
     if amount > campaign.balance {
-        return Err(CampaignGoalActualized.into());
+        return Err(InsufficientFund.into());
     }
 
     if platform_account_info.key() != state.platform_address {
@@ -44,7 +44,7 @@ pub fn withdraw(ctx: Context<WithdrawCtx>, cid: u64, amount: u64) -> Result<()> 
     **campaign.to_account_info().try_borrow_mut_lamports()? -= creator_amount;
     **creator.to_account_info().try_borrow_mut_lamports()? += creator_amount;
 
-    // Transfering 5% to campaign creator
+    // Transfering 5% to platform address
     **campaign.to_account_info().try_borrow_mut_lamports()? -= platform_fee;
     **platform_account_info.to_account_info().try_borrow_mut_lamports()? += platform_fee;
 

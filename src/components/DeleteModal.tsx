@@ -26,28 +26,36 @@ const DeleteModal = ({
   )
 
   const handleDelete = async () => {
-    if (!publicKey) return toast.warn('Please connect wallet')
+    if (!publicKey || !program) return toast.warn('Please connect wallet')
 
-    await toast.promise(
-      new Promise<void>(async (resolve, reject) => {
-        try {
-          const tx: any = await deleteCampaign(program!, publicKey!, pda!)
+    const toastId = toast.loading('Approve transaction in your wallet...')
 
-          await fetchCampaignDetails(program!, pda)
-          dispatch(setDelModal('scale-0'))
-          
-          console.log(tx)
-          resolve(tx)
-        } catch (error) {
-          reject(error)
-        }
-      }),
-      {
-        pending: 'Approve transaction...',
-        success: 'Transaction successful 👌',
-        error: 'Encountered error 🤯',
-      }
-    )
+    try {
+      const tx = await deleteCampaign(program, publicKey, pda!)
+
+      await fetchCampaignDetails(program, pda)
+      dispatch(setDelModal('scale-0'))
+
+      toast.update(toastId, {
+        render: 'Campaign deleted successfully 👌',
+        type: 'success',
+        isLoading: false,
+        autoClose: 5000,
+      })
+      console.log(tx)
+    } catch (error: any) {
+      const isRejected =
+        error?.name === 'WalletSignTransactionError' ||
+        error?.message?.includes('User rejected') ||
+        error?.message?.includes('rejected the request')
+
+      toast.update(toastId, {
+        render: isRejected ? 'Transaction cancelled by user' : 'Delete failed 🤯',
+        type: isRejected ? 'warning' : 'error',
+        isLoading: false,
+        autoClose: 5000,
+      })
+    }
   }
 
   return (

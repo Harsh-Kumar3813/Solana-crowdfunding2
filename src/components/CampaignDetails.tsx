@@ -18,7 +18,7 @@ const CampaignDetails: React.FC<{ campaign: Campaign }> = ({ campaign }) => {
   const statusColor = campaign.active ? 'text-green-600' : 'text-red-600'
   const statusText = campaign.active ? 'Active' : 'Ended'
 
-  const CLUSTER_NAME = process.env.CLUSTER_NAME || 'custom'
+  const CLUSTER_NAME = process.env.NEXT_PUBLIC_CLUSTER || 'devnet'
 
   return (
     <div className="md:col-span-2">

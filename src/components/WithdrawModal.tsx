@@ -38,33 +38,36 @@ const WithdrawModal = ({
     e.preventDefault()
     if (!program || !publicKey || !amount) return
 
-    await toast.promise(
-      new Promise<void>(async (resolve, reject) => {
-        try {
-          const tx: any = await withdrawFromCampaign(
-            program!,
-            publicKey!,
-            pda,
-            Number(amount)
-          )
+    const toastId = toast.loading('Approve transaction in your wallet...')
 
-          setAmount('')
-          await fetchCampaignDetails(program!, pda)
-          await fetchAllWithsrawals(program!, pda)
-          
-          dispatch(setWithdrawModal('scale-0'))
-          console.log(tx)
-          resolve(tx)
-        } catch (error) {
-          reject(error)
-        }
-      }),
-      {
-        pending: 'Approve transaction...',
-        success: 'Transaction successful 👌',
-        error: 'Encountered error 🤯',
-      }
-    )
+    try {
+      const tx = await withdrawFromCampaign(program, publicKey, pda, Number(amount))
+
+      setAmount('')
+      await fetchCampaignDetails(program, pda)
+      await fetchAllWithsrawals(program, pda)
+      dispatch(setWithdrawModal('scale-0'))
+
+      toast.update(toastId, {
+        render: 'Withdrawal successful 👌',
+        type: 'success',
+        isLoading: false,
+        autoClose: 5000,
+      })
+      console.log(tx)
+    } catch (error: any) {
+      const isRejected =
+        error?.name === 'WalletSignTransactionError' ||
+        error?.message?.includes('User rejected') ||
+        error?.message?.includes('rejected the request')
+
+      toast.update(toastId, {
+        render: isRejected ? 'Transaction cancelled by user' : 'Withdrawal failed 🤯',
+        type: isRejected ? 'warning' : 'error',
+        isLoading: false,
+        autoClose: 5000,
+      })
+    }
   }
 
   return (
@@ -112,9 +115,8 @@ const WithdrawModal = ({
             <button
               type="submit"
               disabled={!amount}
-              className={`w-full bg-green-600 hover:bg-green-700 ${
-                !amount ? 'opacity-50 cursor-not-allowed' : ''
-              } text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2`}
+              className={`w-full bg-green-600 hover:bg-green-700 ${!amount ? 'opacity-50 cursor-not-allowed' : ''
+                } text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2`}
             >
               Withdraw
             </button>

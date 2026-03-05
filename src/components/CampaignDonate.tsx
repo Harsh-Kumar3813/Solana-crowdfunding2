@@ -34,34 +34,37 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
       return toast.warn('Amount exceeds campaign goal')
     }
 
-    if (!publicKey) return toast.warn('Please connect wallet')
+    if (!publicKey || !program) return toast.warn('Please connect wallet')
 
-    await toast.promise(
-      new Promise<void>(async (resolve, reject) => {
-        try {
-          const tx: any = await donateToCampaign(
-            program!,
-            publicKey!,
-            pda!,
-            Number(amount)
-          )
+    const toastId = toast.loading('Approve transaction in your wallet...')
 
-          setAmount('')
-          await fetchCampaignDetails(program!, pda)
-          await fetchAllDonations(program!, pda)
+    try {
+      const tx = await donateToCampaign(program, publicKey, pda!, Number(amount))
 
-          console.log(tx)
-          resolve(tx)
-        } catch (error) {
-          reject(error)
-        }
-      }),
-      {
-        pending: 'Approve transaction...',
-        success: 'Transaction successful 👌',
-        error: 'Encountered error 🤯',
-      }
-    )
+      setAmount('')
+      await fetchCampaignDetails(program, pda)
+      await fetchAllDonations(program, pda)
+
+      toast.update(toastId, {
+        render: 'Donation successful 👌',
+        type: 'success',
+        isLoading: false,
+        autoClose: 5000,
+      })
+      console.log(tx)
+    } catch (error: any) {
+      const isRejected =
+        error?.name === 'WalletSignTransactionError' ||
+        error?.message?.includes('User rejected') ||
+        error?.message?.includes('rejected the request')
+
+      toast.update(toastId, {
+        render: isRejected ? 'Transaction cancelled by user' : 'Donation failed 🤯',
+        type: isRejected ? 'warning' : 'error',
+        isLoading: false,
+        autoClose: 5000,
+      })
+    }
   }
 
   return (
@@ -102,13 +105,12 @@ const CampaignDonate: React.FC<{ campaign: Campaign; pda: string }> = ({
               !campaign.active ||
               campaign.amountRaised >= campaign.goal
             }
-            className={`mt-4 w-full bg-green-600 hover:bg-green-700 ${
-              !amount ||
-              !campaign.active ||
-              campaign.amountRaised >= campaign.goal
+            className={`mt-4 w-full bg-green-600 hover:bg-green-700 ${!amount ||
+                !campaign.active ||
+                campaign.amountRaised >= campaign.goal
                 ? 'opacity-50 cursor-not-allowed'
                 : ''
-            } text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2`}
+              } text-white font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-2`}
           >
             <FaDonate />
             Donate Now

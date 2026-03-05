@@ -21,7 +21,13 @@ export default function AppWalletProvider({
 }: {
   children: React.ReactNode
 }) {
-  const network = WalletAdapterNetwork.Devnet
+  const cluster = process.env.NEXT_PUBLIC_CLUSTER || 'devnet'
+  const network =
+    cluster === 'mainnet-beta'
+      ? WalletAdapterNetwork.Mainnet
+      : cluster === 'testnet'
+        ? WalletAdapterNetwork.Testnet
+        : WalletAdapterNetwork.Devnet
   const endpoint = useMemo(() => clusterApiUrl(network), [network])
 
   const wallets = useMemo(

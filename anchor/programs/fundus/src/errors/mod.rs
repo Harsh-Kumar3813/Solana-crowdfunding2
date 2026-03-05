@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 
 #[error_code]
 pub enum ErrorCode {
-    #[msg("Th program has already been initialied.")]
+    #[msg("The program has already been initialized.")]
     AlreadyInitialized,
     #[msg("Title exceeds the maximum length of 64 characters.")]
     TitleTooLong,

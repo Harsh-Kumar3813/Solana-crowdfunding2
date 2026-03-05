@@ -40,7 +40,7 @@ export const getProvider = (
 export const getProviderReadonly = (): Program<Fundus> => {
   const connection = new Connection(RPC_URL, 'confirmed')
 
-  const walllet = {
+  const wallet = {
     publicKey: PublicKey.default,
     signTransaction: async () => {
       throw new Error('Read-only provider cannot sign transactions.')
@@ -52,7 +52,7 @@ export const getProviderReadonly = (): Program<Fundus> => {
 
   const provider = new AnchorProvider(
     connection,
-    walllet as unknown as Wallet,
+    wallet as unknown as Wallet,
     { commitment: 'processed' }
   )
 
