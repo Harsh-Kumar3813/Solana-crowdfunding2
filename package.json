@@ -8,15 +8,16 @@
     "start": "next start"
   },
   "dependencies": {
-    "next": "14.2.14",
-    "react": "18.3.1",
-    "react-dom": "18.3.1",
-    "@solana/web3.js": "^1.95.0",
+    "@reduxjs/toolkit": "^2.2.3",
     "@solana/wallet-adapter-base": "^0.9.23",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/wallet-adapter-wallets": "^0.19.32",
-    "react-redux": "^9.1.2",
-    "@reduxjs/toolkit": "^2.2.3"
+    "@solana/web3.js": "^1.95.0",
+    "next": "14.2.14",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-icons": "^5.6.0",
+    "react-redux": "^9.1.2"
   }
 }
