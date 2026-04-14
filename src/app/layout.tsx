@@ -1,6 +1,8 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import ClientProviders from '@/components/ClientProviders'
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from 'react-toastify';
 
 export const metadata: Metadata = {
   title: 'SolanaCrowd — Decentralized Crowdfunding',
@@ -15,7 +17,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-white">
-        <ClientProviders>{children}</ClientProviders>
+        <ClientProviders>
+          {children}
+        </ClientProviders>
+
+        {/* ✅ ADD THIS */}
+        <ToastContainer />
       </body>
     </html>
   )
