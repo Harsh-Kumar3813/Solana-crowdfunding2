@@ -2,7 +2,7 @@ import {
   fetchActiveCampaigns,
   getProviderReadonly,
 } from '@/services/blockchain'
-import 'dotenv/config'
+//import 'dotenv/config'
 
 export async function GET(request: Request) {
   const secretKey = process.env.SECRET_KEY || ''

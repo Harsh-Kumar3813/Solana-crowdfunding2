@@ -1,5 +1,5 @@
 import { Connection, clusterApiUrl, PublicKey } from '@solana/web3.js'
-import 'dotenv/config'
+//import 'dotenv/config'
 
 export async function POST(request: Request) {
   const secretKey = process.env.SECRET_KEY || ''
