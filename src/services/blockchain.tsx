@@ -300,25 +300,32 @@ export const fetchUserCampaigns = async (
 export const fetchCampaignDetails = async (
   program: Program<Fundus>,
   pda: string
-): Promise<Campaign> => {
-  const campaign = await program.account.campaign.fetch(pda)
-  const serialized: Campaign = {
-    ...campaign,
-    publicKey: pda,
-    cid: campaign.cid.toNumber(),
-    creator: campaign.creator.toBase58(),
-    goal: campaign.goal.toNumber() / 1e9,
-    amountRaised: campaign.amount_raised.toNumber() / 1e9,
-    imageUrl: campaign.image_url,
-    timestamp: campaign.timestamp.toNumber() * 1000,
-    donors: campaign.donors.toNumber(),
-    withdrawals: campaign.withdrawals.toNumber(),
-    balance: campaign.balance.toNumber() / 1e9,
+): Promise<Campaign | null> => {
+  try {
+    const campaign = await program.account.campaign.fetch(pda)
+
+    if (!campaign) return null
+
+    const serialized: Campaign = {
+      ...campaign,
+      publicKey: pda,
+      cid: campaign?.cid?.toNumber?.() ?? 0,
+      creator: campaign?.creator?.toBase58?.() ?? '',
+      goal: (campaign?.goal?.toNumber?.() ?? 0) / 1e9,
+      amountRaised: (campaign?.amount_raised?.toNumber?.() ?? 0) / 1e9,
+      imageUrl: campaign?.image_url ?? '',
+      timestamp: (campaign?.timestamp?.toNumber?.() ?? 0) * 1000,
+      donors: campaign?.donors?.toNumber?.() ?? 0,
+      withdrawals: campaign?.withdrawals?.toNumber?.() ?? 0,
+      balance: (campaign?.balance?.toNumber?.() ?? 0) / 1e9,
+    }
+
+    store.dispatch(setCampaign(serialized))
+    return serialized
+  } catch (error) {
+    console.error("fetchCampaignDetails error:", error)
+    return null
   }
-
-  store.dispatch(setCampaign(serialized))
-
-  return serialized
 }
 
 export const fetchAllDonations = async (
@@ -329,8 +336,8 @@ export const fetchAllDonations = async (
   const transactions = await program.account.transaction.all()
 
   const donations = transactions.filter((tx) => {
-    return tx.account.cid.eq(campaign.cid) && tx.account.credited
-  })
+  return tx.account.cid.eq(campaign.cid) && tx.account.credited
+})
 
   store.dispatch(setDonations(serializedTxs(donations)))
   return serializedTxs(donations)
@@ -344,8 +351,8 @@ export const fetchAllWithsrawals = async (
   const transactions = await program.account.transaction.all()
 
   const withdrawals = transactions.filter((tx) => {
-    return tx.account.cid.eq(campaign.cid) && !tx.account.credited
-  })
+  return tx.account.cid.eq(campaign.cid) && !tx.account.credited
+})
 
   store.dispatch(setWithdrawls(serializedTxs(withdrawals)))
   return serializedTxs(withdrawals)
@@ -353,48 +360,55 @@ export const fetchAllWithsrawals = async (
 
 export const fetchProgramState = async (
   program: Program<Fundus>
-): Promise<ProgramState> => {
-  const [programStatePda] = PublicKey.findProgramAddressSync(
-    [Buffer.from('program_state')],
-    program.programId
-  )
+): Promise<ProgramState | null> => {
+  try {
+    const [programStatePda] = PublicKey.findProgramAddressSync(
+      [Buffer.from('program_state')],
+      program.programId
+    )
 
-  const programState = await program.account.programState.fetch(programStatePda)
+    const programState = await program.account.ProgramState.fetch(programStatePda)
 
-  const serialized: ProgramState = {
-    ...programState,
-    campaignCount: programState.campaign_count.toNumber(),
-    platformFee: programState.platform_fee.toNumber(),
-    platformAddress: programState.platform_address.toBase58(),
+    if (!programState) return null
+
+    const serialized: ProgramState = {
+      ...programState,
+      campaignCount: programState?.campaign_count?.toNumber?.() ?? 0,
+      platformFee: programState?.platform_fee?.toNumber?.() ?? 0,
+      platformAddress: programState?.platform_address?.toBase58?.() ?? '',
+    }
+
+    store.dispatch(setStates(serialized))
+    return serialized
+  } catch (error) {
+    console.error("fetchProgramState error:", error)
+    return null
   }
-
-  store.dispatch(setStates(serialized))
-  return serialized
 }
 
 const serializedCampaigns = (campaigns: any[]): Campaign[] => {
   return campaigns.map((c: any) => ({
     ...c.account,
-    publicKey: c.publicKey.toBase58(),
-    cid: c.account.cid.toNumber(),
-    creator: c.account.creator.toBase58(),
-    goal: c.account.goal.toNumber() / 1e9,
-    amountRaised: c.account.amount_raised.toNumber() / 1e9,
-    imageUrl: c.account.image_url,
-    timestamp: c.account.timestamp.toNumber() * 1000,
-    donors: c.account.donors.toNumber(),
-    withdrawals: c.account.withdrawals.toNumber(),
-    balance: c.account.balance.toNumber() / 1e9,
+    publicKey: c.publicKey?.toBase58?.() ?? '',
+    cid: c.account?.cid?.toNumber?.() ?? 0,
+    creator: c.account?.creator?.toBase58?.() ?? '',
+    goal: (c.account?.goal?.toNumber?.() ?? 0) / 1e9,
+    amountRaised: (c.account?.amount_raised?.toNumber?.() ?? 0) / 1e9,
+    imageUrl: c.account?.image_url ?? '',
+    timestamp: (c.account?.timestamp?.toNumber?.() ?? 0) * 1000,
+    donors: c.account?.donors?.toNumber?.() ?? 0,
+    withdrawals: c.account?.withdrawals?.toNumber?.() ?? 0,
+    balance: (c.account?.balance?.toNumber?.() ?? 0) / 1e9,
   }))
 }
 
 const serializedTxs = (transactions: any[]): Transaction[] => {
   return transactions.map((c: any) => ({
     ...c.account,
-    publicKey: c.publicKey.toBase58(),
-    owner: c.account.owner.toBase58(),
-    cid: c.account.cid.toNumber(),
-    amount: c.account.amount.toNumber() / 1e9,
-    timestamp: c.account.timestamp.toNumber() * 1000,
+    publicKey: c.publicKey?.toBase58?.() ?? '',
+    owner: c.account?.owner?.toBase58?.() ?? '',
+    cid: c.account?.cid?.toNumber?.() ?? 0,
+    amount: (c.account?.amount?.toNumber?.() ?? 0) / 1e9,
+    timestamp: (c.account?.timestamp?.toNumber?.() ?? 0) * 1000,
   }))
 }
